@@ -20,6 +20,8 @@ const state = {
   theme: 'dark',
   dragging: false,
   editing: false,
+  focus: false,
+  nativeFull: false,
   lastTs: 0,
   charCount: 0,
 };
@@ -32,6 +34,11 @@ const progressFill = $('progressFill');
 const statusText = $('statusText');
 const posText = $('posText');
 const btnPlay = $('btnPlay');
+const btnPlayFocus = $('btnPlayFocus');
+const btnReset = $('btnReset');
+const btnResetFocus = $('btnResetFocus');
+const btnFullscreen = $('btnFullscreen');
+const focusExit = $('focusExit');
 const btnEdit = $('btnEdit');
 const speedRange = $('speedRange');
 const speedValue = $('speedValue');
@@ -475,13 +482,16 @@ function saveSettings() {
 }
 
 function loadSettings() {
+  let raw = null;
+  try { raw = localStorage.getItem(LS.settings); } catch (e) { /* 忽略 */ }
   try {
-    const s = JSON.parse(localStorage.getItem(LS.settings) || '{}');
+    const s = JSON.parse(raw || '{}');
     if (typeof s.speed === 'number') state.speed = Math.min(300, Math.max(10, s.speed));
     if (typeof s.fontSize === 'number') state.fontSize = Math.min(72, Math.max(18, s.fontSize));
     state.mirror = !!s.mirror;
     if (s.theme === 'light' || s.theme === 'dark') state.theme = s.theme;
   } catch (e) { /* 忽略 */ }
+  return !!raw;
 }
 
 /* ============================================================
@@ -490,7 +500,8 @@ function loadSettings() {
 
 function measure() {
   script.style.paddingTop = Math.max(0, Math.round(viewport.clientHeight * 0.38 - state.fontSize * 0.9)) + 'px';
-  script.style.paddingBottom = Math.round(viewport.clientHeight * 0.7) + 'px';
+  const focusExtra = state.focus ? 120 : 0;
+  script.style.paddingBottom = Math.round(viewport.clientHeight * 0.7 + focusExtra) + 'px';
   state.maxOffset = Math.max(0, script.offsetHeight - viewport.clientHeight);
   setOffset(state.offset);
 }
@@ -505,7 +516,9 @@ function setOffset(px) {
 
 function setPlaying(on, note) {
   state.playing = !!on;
-  btnPlay.textContent = state.playing ? '❚❚ 暂停' : '▶ 播放';
+  const label = state.playing ? '❚❚ 暂停' : '▶ 播放';
+  btnPlay.textContent = label;
+  btnPlayFocus.textContent = label;
   statusText.textContent = note || (state.playing ? '播放中' : '已暂停');
 }
 
@@ -535,6 +548,46 @@ function changeFont(delta) {
   saveSettings();
 }
 
+let exitTimer = null;
+let lastTapT = 0;
+
+function showFocusExit() {
+  if (!state.focus) return;
+  focusExit.classList.add('show');
+  clearTimeout(exitTimer);
+  exitTimer = setTimeout(() => focusExit.classList.remove('show'), 2600);
+}
+
+function setFocus(on) {
+  if (state.focus === !!on) return;
+  state.focus = !!on;
+  document.body.classList.toggle('focus-mode', state.focus);
+  btnFullscreen.classList.toggle('active', state.focus);
+
+  if (state.focus) {
+    showFocusExit();
+    try {
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen()
+          .then(() => { state.nativeFull = true; })
+          .catch(() => { state.nativeFull = false; });
+      }
+    } catch (e) { /* 移动端 Safari 不支持时保持 CSS 沉浸模式 */ }
+    measure();
+    toast('轻触屏幕显示退出按钮，双击或按 Esc 退出');
+  } else {
+    clearTimeout(exitTimer);
+    focusExit.classList.remove('show');
+    if (state.nativeFull && document.exitFullscreen) {
+      state.nativeFull = false;
+      document.exitFullscreen().catch(() => {});
+    }
+    measure();
+  }
+}
+
+function toggleFocus() { setFocus(!state.focus); }
+
 function loop(ts) {
   const dt = Math.min(0.05, (ts - state.lastTs) / 1000 || 0);
   state.lastTs = ts;
@@ -555,28 +608,44 @@ function loop(ts) {
 
 let dragStartY = 0;
 let dragStartOffset = 0;
+let dragPaused = false;
 
 viewport.addEventListener('pointerdown', (e) => {
   if (state.editing || e.button !== 0 || e.target.closest('button')) return;
   state.dragging = true;
+  dragPaused = false;
   dragStartY = e.clientY;
   dragStartOffset = state.offset;
   viewport.classList.add('dragging');
   viewport.setPointerCapture(e.pointerId);
-  setPlaying(false, '已暂停 · 手动滑动');
 });
 
 viewport.addEventListener('pointermove', (e) => {
   if (!state.dragging) return;
-  setOffset(dragStartOffset - (e.clientY - dragStartY));
+  const dy = e.clientY - dragStartY;
+  if (!dragPaused && Math.abs(dy) > 2) {
+    dragPaused = true;
+    setPlaying(false, '已暂停 · 手动滑动');
+  }
+  setOffset(dragStartOffset - dy);
 });
 
 function endDrag(e) {
   if (!state.dragging) return;
+  const moved = e && typeof e.clientY === 'number' ? Math.abs(e.clientY - dragStartY) : 999;
   state.dragging = false;
   viewport.classList.remove('dragging');
   if (e && e.pointerId != null && viewport.hasPointerCapture(e.pointerId)) {
     viewport.releasePointerCapture(e.pointerId);
+  }
+  if (state.focus && moved < 8) {
+    const now = Date.now();
+    if (now - lastTapT < 400) {
+      setFocus(false);
+    } else {
+      lastTapT = now;
+      showFocusExit();
+    }
   }
 }
 viewport.addEventListener('pointerup', endDrag);
@@ -611,14 +680,31 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault(); setOffset(0); break;
     case 'End':
       e.preventDefault(); setOffset(state.maxOffset); break;
+    case 'f': case 'F':
+      e.preventDefault(); toggleFocus(); break;
     case 'Escape':
-      if (state.editing) setEditing(false); break;
+      if (state.focus) setFocus(false);
+      else if (state.editing) setEditing(false);
+      break;
     default: break;
   }
 });
 
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement && state.focus) measure();
+  if (!document.fullscreenElement && state.focus && state.nativeFull) {
+    state.nativeFull = false;
+    setFocus(false);
+  }
+});
+
 btnPlay.addEventListener('click', togglePlay);
-$('btnReset').addEventListener('click', () => { setPlaying(false, '已回到开头'); setOffset(0); });
+btnPlayFocus.addEventListener('click', togglePlay);
+function resetToStart() { setPlaying(false, '已回到开头'); setOffset(0); }
+btnReset.addEventListener('click', resetToStart);
+btnResetFocus.addEventListener('click', resetToStart);
+btnFullscreen.addEventListener('click', toggleFocus);
+focusExit.addEventListener('click', () => setFocus(false));
 $('btnSlower').addEventListener('click', () => changeSpeed(-10));
 $('btnFaster').addEventListener('click', () => changeSpeed(10));
 $('btnFontSmall').addEventListener('click', () => changeFont(-2));
@@ -748,7 +834,8 @@ function toast(msg) {
  * ============================================================ */
 
 function init() {
-  loadSettings();
+  const hadSettings = loadSettings();
+  if (!hadSettings && window.matchMedia('(max-width: 760px)').matches) state.fontSize = 30;
   document.body.dataset.theme = state.theme;
   speedRange.value = state.speed;
   speedValue.textContent = state.speed + ' px/s';

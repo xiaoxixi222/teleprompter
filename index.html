@@ -28,6 +28,7 @@
       <button class="btn ghost" id="btnExportTxt" title="导出为纯文本">导出 TXT</button>
       <span class="divider"></span>
       <button class="btn icon" id="btnTheme" title="切换明暗主题">◐</button>
+      <button class="btn icon" id="btnFullscreen" title="全屏提词（F 键）">⛶</button>
     </div>
   </header>
 
@@ -80,6 +81,13 @@
       空格 播放/暂停 · ↑↓ 微调 · ± 调速 · Home 回到开头 · 滚轮或拖拽手动滑动
     </div>
   </footer>
+
+  <button class="focus-exit" id="focusExit" title="退出全屏（Esc 键）">退出全屏</button>
+
+  <div class="focus-dock" id="focusDock">
+    <button class="btn play" id="btnPlayFocus">▶ 播放</button>
+    <button class="btn" id="btnResetFocus">⟲ 回到开头</button>
+  </div>
 </div>
 
 <div class="modal" id="pasteModal" hidden>
