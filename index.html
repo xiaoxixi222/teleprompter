@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提词器 · Teleprompter</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="dark">
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">▤</span>
+      <div class="brand-text">
+        <strong>提词器</strong>
+        <small>TELEPROMPTER</small>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <input type="file" id="fileInput" accept=".json,.txt,.html,.md,application/json,text/plain,text/html" hidden>
+      <button class="btn" id="btnImport" title="从本地文件导入 JSON / TXT / HTML">导入文件</button>
+      <button class="btn" id="btnPaste" title="粘贴纯文本、富文本 HTML 或 JSON">粘贴文本</button>
+      <button class="btn" id="btnEdit" title="直接在页面上修改文稿">编辑</button>
+      <span class="divider"></span>
+      <button class="btn ghost" id="btnExportJson" title="导出为提词器 JSON 文稿">导出 JSON</button>
+      <button class="btn ghost" id="btnExportTxt" title="导出为纯文本">导出 TXT</button>
+      <span class="divider"></span>
+      <button class="btn icon" id="btnTheme" title="切换明暗主题">◐</button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="viewport" id="viewport" title="按住拖拽可手动滑动文稿">
+      <div class="track" id="track">
+        <article class="script" id="script" spellcheck="false"></article>
+      </div>
+
+      <div class="guide" aria-hidden="true">
+        <span class="guide-label">朗读线</span>
+        <span class="guide-line"></span>
+      </div>
+
+      <div class="mask mask-top" aria-hidden="true"></div>
+      <div class="mask mask-bottom" aria-hidden="true"></div>
+    </div>
+
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="stage-foot">
+      <span class="status" id="statusText">就绪</span>
+      <span class="counter" id="posText">0% · 0 字</span>
+    </div>
+  </main>
+
+  <footer class="controls">
+    <div class="control-group primary">
+      <button class="btn play" id="btnPlay" title="空格键">▶ 播放</button>
+      <button class="btn" id="btnReset" title="Home 键">⟲ 回到开头</button>
+    </div>
+
+    <div class="control-group">
+      <button class="btn step" id="btnSlower" title="- 键">− 减速</button>
+      <div class="speed-box">
+        <input type="range" id="speedRange" min="10" max="300" step="5" value="70" aria-label="滚动速度">
+        <span class="speed-value" id="speedValue">70 px/s</span>
+      </div>
+      <button class="btn step" id="btnFaster" title="+ 键">＋ 加速</button>
+    </div>
+
+    <div class="control-group">
+      <button class="btn step" id="btnFontSmall" title="缩小字号">A−</button>
+      <span class="font-value" id="fontValue">32px</span>
+      <button class="btn step" id="btnFontLarge" title="放大字号">A＋</button>
+      <button class="btn ghost" id="btnMirror" title="镜像翻转，适合贴在提词玻璃上">镜像</button>
+    </div>
+
+    <div class="shortcut-hint">
+      空格 播放/暂停 · ↑↓ 微调 · ± 调速 · Home 回到开头 · 滚轮或拖拽手动滑动
+    </div>
+  </footer>
+</div>
+
+<div class="modal" id="pasteModal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>粘贴文本</h2>
+      <button class="btn icon" id="btnCloseModal" title="关闭">✕</button>
+    </div>
+    <p class="modal-desc">支持纯文本、HTML，或富文本 JSON（Quill Delta / blocks 结构均可）。</p>
+    <textarea id="pasteArea" spellcheck="false" placeholder="在这里粘贴文本或 JSON…"></textarea>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancelPaste">取消</button>
+      <button class="btn play" id="btnApplyPaste">载入文稿</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

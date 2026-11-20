@@ -1,0 +1,15 @@
+{
+  "format": "teleprompter-script",
+  "version": 1,
+  "blocks": [
+    { "type": "h1", "html": "产品发布会 · 开场稿" },
+    { "type": "p", "html": "各位<strong>来宾</strong>，大家<em>晚上好</em>。" },
+    { "type": "p", "html": "今天我们带来的是一款<span style=\"color: #ff8a65\">重新定义效率</span>的工具。" },
+    { "type": "h2", "html": "三个关键词" },
+    { "type": "li", "html": "<strong>更快</strong>：启动速度提升 40%" },
+    { "type": "li", "html": "<strong>更稳</strong>：核心链路全链路容灾" },
+    { "type": "li", "html": "<strong>更开放</strong>：支持自定义插件" },
+    { "type": "quote", "html": "让复杂的事情变简单，让简单的事情变愉悦。" },
+    { "type": "p", "html": "接下来，请大家看一段演示。" }
+  ]
+}
