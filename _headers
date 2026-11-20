@@ -1,0 +1,15 @@
+/index.html
+  Cache-Control: public, max-age=60
+
+/app.js
+  Cache-Control: public, max-age=3600
+
+/styles.css
+  Cache-Control: public, max-age=3600
+
+/示例文稿.json
+  Cache-Control: public, max-age=3600
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
