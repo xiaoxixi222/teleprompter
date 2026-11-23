@@ -1,4 +1,5 @@
 .wrangler/
+.workbuddy/
 node_modules/
 dist/
 .DS_Store
