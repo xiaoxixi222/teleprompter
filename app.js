@@ -846,7 +846,7 @@ function init() {
   state.blocks = saved ? saved : sampleBlocks.map((b) => Object.assign({}, b));
   renderScript();
 
-  // 尺寸变化时重新计算朗读线位置与最大滚动距离
+  // 尺寸变化时重新计算起始留白与最大滚动距离
   const ro = new ResizeObserver(() => { if (!state.editing) measure(); });
   ro.observe(viewport);
   window.addEventListener('resize', () => { if (!state.editing) measure(); });

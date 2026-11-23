@@ -10,7 +10,6 @@
   --accent: #3b9dff;
   --accent-hover: #2b8bec;
   --accent-ink: #ffffff;
-  --guide: #ff7a59;
   --script-ink: #f2f6fb;
   --script-sub: #c8d6e6;
   --mask: #0b0f14;
@@ -28,7 +27,6 @@ body[data-theme="light"] {
   --accent: #1f6feb;
   --accent-hover: #185ccc;
   --accent-ink: #ffffff;
-  --guide: #e04f34;
   --script-ink: #111b29;
   --script-sub: #3d4c5f;
   --mask: #eef2f7;
@@ -187,36 +185,6 @@ body {
   padding: .05em .3em;
 }
 
-.guide {
-  position: absolute;
-  top: 38%;
-  left: 0; right: 0;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  opacity: .85;
-}
-.guide-line {
-  flex: 1;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--guide) 8%, var(--guide) 92%, transparent);
-  box-shadow: 0 0 12px rgba(255, 122, 89, .35);
-}
-.guide-label {
-  position: absolute;
-  left: 16px;
-  top: -24px;
-  font-size: 11px;
-  letter-spacing: .12em;
-  color: var(--guide);
-  background: var(--panel);
-  padding: 2px 8px;
-  border: 1px solid var(--guide);
-  border-radius: 20px;
-  opacity: .9;
-}
-
 .mask { position: absolute; left: 0; right: 0; height: 15%; pointer-events: none; }
 .mask-top { top: 0; background: linear-gradient(to bottom, var(--mask), transparent); }
 .mask-bottom { bottom: 0; background: linear-gradient(to top, var(--mask), transparent); }
@@ -305,7 +273,6 @@ body.focus-mode .stage { padding: 0; gap: 0; }
 body.focus-mode .viewport { border: 0; border-radius: 0; box-shadow: none; }
 body.focus-mode .focus-exit { display: block; }
 body.focus-mode .focus-dock { display: flex; }
-body.focus-mode .guide-label { display: none; }
 
 /* ============ 编辑模式 ============ */
 .stage.editing .viewport { overflow: auto; cursor: text; touch-action: auto; user-select: text; -webkit-user-select: text; }
@@ -318,7 +285,7 @@ body.focus-mode .guide-label { display: none; }
   border-radius: 8px;
 }
 .stage.editing .script:focus { outline-color: var(--accent); }
-.stage.editing .mask, .stage.editing .guide { opacity: .2; }
+.stage.editing .mask { opacity: .2; }
 
 /* ============ 弹窗 / 提示 ============ */
 .modal {
@@ -414,7 +381,6 @@ body.focus-mode .guide-label { display: none; }
   .speed-box input[type="range"] { width: 100%; }
   .btn.step { min-width: 60px; min-height: 44px; }
   .font-value { min-width: 50px; }
-  .guide-label { display: none; }
   .mask { height: 12%; }
   .focus-dock .btn { min-width: 0; flex: 1; }
 }
